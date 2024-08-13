@@ -1,7 +1,7 @@
-import { integer, sqliteTable, text, primaryKey } from 'drizzle-orm/sqlite-core'
-import { createClient } from '@libsql/client'
-import { drizzle } from 'drizzle-orm/libsql'
+import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import type { AdapterAccountType } from 'next-auth/adapters'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import z from 'zod'
 
 export const users = sqliteTable('user', {
   id: text('id')
@@ -81,3 +81,13 @@ export const authenticators = sqliteTable(
     }),
   }),
 )
+
+export const insertUserSchema = createInsertSchema(users, {
+  email: (schema) => schema.email.email(),
+})
+
+export const selectUserSchema = createSelectSchema(users, {
+  email: (schema) => schema.email.email(),
+})
+
+export const loginUserSchema = selectUserSchema.pick({ email: true })
