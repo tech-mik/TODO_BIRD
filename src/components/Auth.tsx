@@ -1,7 +1,7 @@
 import { SignOut } from '@phosphor-icons/react/dist/ssr'
 import { signOut } from 'next-auth/react'
-import Image from 'next/image'
 import AuthButton from './AuthButton'
+import AuthInfo from './AuthInfo'
 import {
   Tooltip,
   TooltipContent,
@@ -9,11 +9,11 @@ import {
   TooltipTrigger,
 } from './ui/tooltip'
 import { auth } from '@/auth'
-import { Avatar, AvatarFallback } from './ui/avatar'
-import { AvatarImage } from '@radix-ui/react-avatar'
 
 export default async function Auth() {
   const session = await auth()
+
+  const id = session!.user!.id!
 
   return (
     <div className='flex gap-1 border rounded-xl bg-gray-50 shadow-sm p-1'>
@@ -28,18 +28,7 @@ export default async function Auth() {
         </TooltipProvider>
       </AuthButton>
       <AuthButton className='pr-2'>
-        <Avatar>
-          <AvatarImage src={session?.user?.image || '/no-profile.jpg'} />
-        </Avatar>
-        {/* <Image
-          src={session?.user?.image || '/no-profile.jpg'}
-          width={30}
-          height={30}
-          alt='Mik ten Holt'
-          className='rounded-full'
-        /> */}
-        <span className=''>{session?.user?.name}</span>
-        {/* <CaretDown width={16} height={16} /> */}
+        <AuthInfo id={id} />
       </AuthButton>
     </div>
   )

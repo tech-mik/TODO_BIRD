@@ -13,6 +13,7 @@ import { Button } from './ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form'
 import { Input } from './ui/input'
 import { signIn } from 'next-auth/react'
+import SpinnerSmall from './SpinnerSmall'
 
 export default function SignInForm() {
   const [isPending, setIsPending] = useState(false)
@@ -64,12 +65,7 @@ export default function SignInForm() {
 
         <div className='flex justify-between gap-5 '>
           <Button disabled={isPending} className='w-full' type='submit'>
-            {isPending && (
-              <ArrowsClockwise
-                // size={14}
-                className='mr-2 h-4 w-4 animate-spin'
-              />
-            )}
+            {isPending && <SpinnerSmall />}
             Sign in with Email
           </Button>
           <Button

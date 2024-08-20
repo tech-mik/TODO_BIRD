@@ -1,4 +1,6 @@
+import Providers from '@/util/Providers'
 import type { Metadata } from 'next'
+import { SessionProvider } from 'next-auth/react'
 import { Bitter } from 'next/font/google'
 import { Toaster } from 'sonner'
 import './globals.css'
@@ -18,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={`${font.className} w-screen h-screen antialiased`}>
-        {children}
+        <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>

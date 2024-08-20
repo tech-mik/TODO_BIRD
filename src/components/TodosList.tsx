@@ -1,0 +1,51 @@
+'use client'
+
+import { getTodosByUserId } from '@/actions/todo'
+import Todo from '@/components/Todo'
+import HandleTodosProvider from '@/context/HandleTodosContext'
+import { CircleNotch } from '@phosphor-icons/react'
+import { useQuery } from '@tanstack/react-query'
+import AddTodoForm from './AddTodoForm'
+import EmptyTodo from './EmptyTodo'
+import { CardContent, CardHeader } from './ui/card'
+
+export default function TodosList({ userId }: { userId: string }) {
+  // Load todo's
+  const {
+    data,
+    error: queryError,
+    isLoading,
+  } = useQuery({
+    queryKey: ['todos'],
+    queryFn: () => getTodosByUserId(userId),
+    staleTime: 10000,
+  })
+
+  if (queryError) {
+    throw new Error(queryError.message)
+  }
+
+  if (isLoading) {
+    return (
+      <div className='w-full h-full flex justify-center items-center'>
+        <CircleNotch size={32} className='animate-ping' />
+      </div>
+    )
+  }
+
+  return (
+    <HandleTodosProvider>
+      <CardHeader>
+        <AddTodoForm userId={userId} />
+      </CardHeader>
+
+      <CardContent className='flex flex-col items-center justify-start gap-1'>
+        {data?.data?.length ? (
+          data?.data.map((todo) => <Todo todo={todo} key={todo.id} />)
+        ) : (
+          <EmptyTodo />
+        )}
+      </CardContent>
+    </HandleTodosProvider>
+  )
+}
