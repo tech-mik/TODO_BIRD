@@ -36,7 +36,9 @@ export default function AddTodoForm({ userId }: { userId: string }) {
     },
   })
 
-  // Create new todo mutation
+  /**
+   * Create new todo
+   */
   const { mutate: createTodoMutation } = useMutation({
     mutationKey: ['todos'],
     mutationFn: createTodo,
@@ -84,11 +86,14 @@ export default function AddTodoForm({ userId }: { userId: string }) {
           }),
         )
       } else if (data?.success && data.data !== null) {
-        updateTodo({
-          todo: data.data,
-          previousTodos: context?.previousTodos,
-        })
-        await queryClient.invalidateQueries({ queryKey: ['todos'] })
+        queryClient.setQueryData(
+          ['todos'],
+          updateTodo({
+            todo: data.data,
+            previousTodos: context?.previousTodos,
+          }),
+        )
+        // await queryClient.invalidateQueries({ queryKey: ['todos'] })
       } else {
         throw new Error('Something went wrong, please try again.')
       }

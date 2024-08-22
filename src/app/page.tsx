@@ -25,7 +25,14 @@ export default async function Home() {
 
   await queryClient.prefetchQuery({
     queryKey: ['todos'],
-    queryFn: () => getTodosByUserId(id),
+    queryFn: async () => {
+      const data = await getTodosByUserId(id)
+      if (data.success) {
+        return data.data
+      } else {
+        throw new Error('Something went wrong, please try again later.')
+      }
+    },
     staleTime: 60 * 1000,
   })
 

@@ -17,7 +17,16 @@ export default function TodosList({ userId }: { userId: string }) {
     isLoading,
   } = useQuery({
     queryKey: ['todos'],
-    queryFn: () => getTodosByUserId(userId),
+    queryFn: async () => {
+      const data = await getTodosByUserId(userId)
+
+      if (data.success) {
+        return data.data
+      } else {
+        throw new Error('Something went wrong, please try again later.')
+      }
+    },
+    throwOnError: true,
     staleTime: 10000,
   })
 
@@ -40,8 +49,8 @@ export default function TodosList({ userId }: { userId: string }) {
       </CardHeader>
 
       <CardContent className='flex flex-col items-center justify-start gap-1'>
-        {data?.data?.length ? (
-          data?.data.map((todo) => <Todo todo={todo} key={todo.id} />)
+        {data?.length ? (
+          data?.map((todo) => <Todo todo={todo} key={todo.id} />)
         ) : (
           <EmptyTodo />
         )}

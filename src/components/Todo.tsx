@@ -1,51 +1,38 @@
 'use client'
 
-import { deleteTodo, toggleTodoCompleted } from '@/actions/todo'
+import { editTodo, toggleTodoCompleted } from '@/actions/todo'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   HandleTodosContext,
   IHandleTodosContext,
 } from '@/context/HandleTodosContext'
-import { TTodo } from '@/types/todos'
-import { Trash } from '@phosphor-icons/react'
+import { insertTodoSchema } from '@/db/schemas/todos'
+import { TNewTodo, TTodo } from '@/types/todos'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FloppyDisk, X } from '@phosphor-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import TodoOptions from './TodoOptions'
 import { Button } from './ui/button'
+import { Form, FormControl, FormField, FormItem } from './ui/form'
+import { Input } from './ui/input'
+import { todo } from 'node:test'
 
 interface ITodoProps {
   todo: TTodo & { isLoading?: boolean }
 }
 
 export default function Todo({ todo }: ITodoProps) {
+  const [showForm, setShowForm] = useState(false)
+  const { updateTodo } = useContext(HandleTodosContext) as IHandleTodosContext
+
   const queryClient = useQueryClient()
-  const { removeTodo } = useContext(HandleTodosContext) as IHandleTodosContext
 
-  /**
-   * Delete todo mutation
-   */
-  const { mutate: deleteTodoMutation } = useMutation({
-    mutationKey: ['todos'],
-    mutationFn: (todo) => deleteTodo(todo),
-    onError: (error) => {
-      toast.error(error.message)
-    },
-    onMutate: async (todo: TTodo) => {
-      // Cancel queries to prevent UI from updating during optimistic update
-      await queryClient.cancelQueries({ queryKey: ['todos'] })
-
-      // Get previous todo
-      const previousTodos = queryClient.getQueryData<TTodo[]>(['todos'])
-
-      // Update state, delete todo from UI
-      queryClient.setQueryData(['todos'], removeTodo({ todo, previousTodos }))
-    },
-
-    onSettled: (data, error, variables, context) => {
-      toast.success('Todo deleted successfully')
-
-      queryClient.invalidateQueries({ queryKey: ['todos'] })
-    },
+  const form = useForm({
+    resolver: zodResolver(insertTodoSchema),
+    defaultValues: { text: todo.text },
   })
 
   /**
@@ -57,48 +44,152 @@ export default function Todo({ todo }: ITodoProps) {
     onMutate: async (oldTodo) => {
       await queryClient.cancelQueries({ queryKey: ['todos'] })
 
-      const previousTodos = queryClient.getQueryData(['todos'])
+      const previousTodos = queryClient.getQueryData<TTodo[]>(['todos'])
 
-      queryClient.setQueryData<TTodo[]>(['todos'], (old) => {
-        return old?.map((t) => {
-          if (t.id === oldTodo.id) {
-            return { ...t, completed: !t.completed }
-          }
-          return t
-        })
-      })
+      const newTodo = {
+        ...oldTodo,
+        completed: !oldTodo.completed,
+      }
 
-      return { previousTodos }
+      queryClient.setQueryData(
+        ['todos'],
+        updateTodo({ todo: newTodo, previousTodos }),
+      )
+
+      return { oldTodo, previousTodos }
     },
-    onError: (err, newTodo, context) => {
-      queryClient.setQueryData(['todos'], context?.previousTodos)
+    onSettled: async (data, error, variables, context) => {
+      if (data?.error) {
+        queryClient.setQueryData(
+          ['todos'],
+          updateTodo({
+            todo: context?.oldTodo!,
+            previousTodos: context?.previousTodos,
+          }),
+        )
+      }
     },
   })
+
+  /**
+   * Edit todo mutation
+   */
+  const { mutate: editTodoMutation } = useMutation({
+    mutationKey: ['todos'],
+    mutationFn: editTodo,
+    onMutate: async (updatedTodo) => {
+      await queryClient.cancelQueries({ queryKey: ['todos'] })
+
+      const previousTodos = queryClient.getQueryData<TTodo[]>(['todos'])
+
+      const newTodo = {
+        ...updatedTodo,
+        isLoading: true,
+      }
+
+      // Update the cache with the new todo
+      queryClient.setQueryData(
+        ['todos'],
+        updateTodo({ todo: newTodo, previousTodos }),
+      )
+
+      setShowForm(false)
+
+      return { originalTodo: todo, previousTodos }
+    },
+    onSettled: async (data, error, variables, context) => {
+      if (data?.error) {
+        queryClient.setQueryData(
+          ['todos'],
+          updateTodo({
+            todo: context?.originalTodo!,
+            previousTodos: context?.previousTodos,
+          }),
+        )
+        setShowForm(true)
+        toast.error('Something went wrong, please try again later.')
+      } else if (data?.success && data.data !== null) {
+        queryClient.setQueryData(
+          ['todos'],
+          updateTodo({
+            todo: data.data,
+            previousTodos: context?.previousTodos,
+          }),
+        )
+      }
+    },
+  })
+
+  function handleCancelEdit() {
+    setShowForm(false)
+    form.reset()
+  }
+
+  function onSubmit(value: TNewTodo) {
+    const newTodo = { ...todo, text: value.text }
+
+    editTodoMutation(newTodo)
+  }
 
   return (
     <div
       key={todo.id}
-      className={`flex items-center justify-between bg-secondary w-full p-3 rounded-lg ${
+      className={`flex items-center justify-between gap-1 bg-secondary w-full pl-3 pr-1 py-1 rounded-lg ${
         todo.isLoading ? 'animate-pulse' : ''
       }`}>
-      <div className='flex justify-start items-center gap-3'>
+      <div className='flex justify-start items-center gap-3 w-full'>
         <Checkbox
           onCheckedChange={() => toggleTodoMutation(todo)}
           checked={todo.completed}
+          disabled={todo.isLoading || showForm}
         />
-        <span className={`${todo.completed ? 'line-through' : ''}`}>
-          {' '}
-          {todo.text}
-        </span>
+        {showForm && (
+          <Form {...form}>
+            <form className='w-full' onSubmit={form.handleSubmit(onSubmit)}>
+              <FormField
+                control={form.control}
+                name='text'
+                render={({ field }) => (
+                  <FormItem className='w-full'>
+                    <FormControl>
+                      <Input {...field} type='text' defaultValue={todo.text} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
+        )}
+
+        {!showForm && (
+          <span className={`${todo.completed ? 'line-through' : ''}`}>
+            {' '}
+            {todo.text}
+          </span>
+        )}
       </div>
-      <Button
-        disabled={todo.isLoading}
-        type='button'
-        variant={'destructive'}
-        className='px-3'
-        onClick={() => deleteTodoMutation(todo)}>
-        <Trash />
-      </Button>
+      {showForm && (
+        <>
+          <Button
+            className='bg-green-600 px-3'
+            onClick={form.handleSubmit(onSubmit)}>
+            <FloppyDisk />
+          </Button>
+          <Button
+            variant='destructive'
+            className='px-3'
+            onClick={handleCancelEdit}>
+            <X />
+          </Button>
+        </>
+      )}
+      {!showForm && (
+        <TodoOptions
+          todo={todo}
+          showForm={showForm}
+          setShowForm={setShowForm}
+        />
+      )}
     </div>
   )
 }

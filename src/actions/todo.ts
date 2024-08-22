@@ -3,7 +3,7 @@
 import { auth } from '@/auth'
 import { db } from '@/db'
 import { insertTodoSchema, todos } from '@/db/schemas/todos'
-import { TTodo, TTodoActionResponse } from '@/types/todos'
+import { TNewTodo, TTodo, TTodoActionResponse } from '@/types/todos'
 import { wait } from '@/util/helpers'
 import { desc, eq } from 'drizzle-orm'
 import z from 'zod'
@@ -104,7 +104,9 @@ export async function createTodo(
  *
  * If it fails to delete, it will throw an error.
  */
-export async function deleteTodo(todo: TTodo) {
+export async function deleteTodo(
+  todo: TTodo,
+): Promise<TTodoActionResponse<null>> {
   try {
     // First let's confirm that current user is logged-in
     // and the owner of the todo
@@ -113,13 +115,20 @@ export async function deleteTodo(todo: TTodo) {
       // If the user is the owner, we delete the todo
       await db.delete(todos).where(eq(todos.id, todo.id))
 
-      return { success: true }
+      return { success: true, data: null }
     } else {
       throw new Error('You are not authorized to delete this todo')
     }
   } catch (error) {
     console.error(error)
-    throw new Error('Something went wrong, please try again later')
+    return {
+      data: null,
+      success: false,
+      error: {
+        status: 500,
+        errors: [{ message: 'Something went wrong, please try again later' }],
+      },
+    }
   }
 }
 
@@ -129,26 +138,89 @@ export async function deleteTodo(todo: TTodo) {
  * If it succeeds, it will return an object with the error
  * key set to true. If it fails, it will throw an error.
  */
-export async function toggleTodoCompleted(todo: TTodo) {
+export async function toggleTodoCompleted(
+  todo: TTodo,
+): Promise<TTodoActionResponse<TTodo>> {
   try {
     // First let's confirm that current user is logged-in
     // and the owner of the todo
     const session = await auth()
     if (session?.user?.id && session.user.id === todo.userId) {
       // If the user is the owner, let's toggle the todo
-      const res = await db
+      const data = await db
         .update(todos)
         .set({
           completed: !todo.completed,
         })
         .where(eq(todos.id, todo.id))
+        .returning()
 
-      return { success: true }
+      return { success: true, data: data[0] }
     } else {
       throw new Error('User not authorized to update this todo')
     }
   } catch (error) {
     console.error(error)
-    throw new Error('Something went wrong, please try again later')
+    return {
+      data: null,
+      success: false,
+      error: {
+        status: 500,
+        errors: [{ message: 'Something went wrong, please try again later' }],
+      },
+    }
+  }
+}
+
+/**
+ * Server action to edit a todo
+ *
+ * If it succeeds, it returns the todo
+ * If it fails, it throws an error
+ */
+export async function editTodo(
+  todo: TTodo,
+): Promise<TTodoActionResponse<TTodo>> {
+  try {
+    // First let's confirm that current user is logged-in
+    // and the owner of the todo
+    const session = await auth()
+    if (session?.user?.id && session.user.id === todo.userId) {
+      // Now lets validate user input
+      insertTodoSchema.parse(todo)
+
+      // Let's update the todo
+      const data = await db
+        .update(todos)
+        .set({
+          ...todo,
+          userId: session.user.id,
+        })
+        .where(eq(todos.id, todo.id))
+        .returning()
+
+      return { success: true, data: data[0] }
+    } else {
+      throw new Error('User not authorized to update this todo')
+    }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        data: null,
+        success: false,
+        error: { status: 400, errors: error.errors },
+      }
+    } else {
+      // Other error's
+      console.error(error)
+      return {
+        data: null,
+        success: false,
+        error: {
+          errors: [{ message: 'Something went wrong, please try again later' }],
+          status: 500,
+        },
+      }
+    }
   }
 }

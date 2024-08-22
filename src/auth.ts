@@ -32,28 +32,12 @@ export const {
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
-  debug: !!(process.env.NODE_ENV === 'development'),
+  // debug: !!(process.env.NODE_ENV === 'development'),
   callbacks: {
     authorized: async ({ auth }) => {
       // Logged in users are authenticated, otherwise redirect to login page
       return !!auth
     },
-    // signIn: async ({ user, account }) => {
-    // if (account?.provider === 'resend') {
-    // if (!user?.email) return false
-    //   const userExists = await db
-    //     .select({ email: users.email })
-    //     .from(users)
-    //     .where(eq(users.email, user.email))
-    //   if (userExists.length === 0) {
-    //     throw new Error('This emailaddress does not exist')
-    //   }
-    //   return true
-    // } else if (account?.provider === 'google') {
-    //   return true
-    // }
-    // return false
-    // },
   },
   pages: {
     signIn: '/auth/signin',

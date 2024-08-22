@@ -1,17 +1,14 @@
 'use client'
 
-import { TNewTodo, TTodo } from '@/types/todos'
+import { TNewTodo, TTodo, TTodoActionResponse } from '@/types/todos'
 import { createContext, useRef } from 'react'
 
-type THandleTodo = (params: {
-  todo: TNewTodo | TTodo
-  previousTodos: TNewTodo[] | undefined
-}) => TNewTodo[]
-
-interface IUseOptimisticTodoProps {
+interface IOptimisticTodoActionParams {
   todo: TNewTodo | TTodo
   previousTodos?: TNewTodo[] | undefined
 }
+
+type THandleTodo = (params: IOptimisticTodoActionParams) => TNewTodo[]
 
 export interface IHandleTodosContext {
   addTodo: THandleTodo
@@ -30,10 +27,11 @@ export default function HandleTodosProvider({
 }) {
   const todos = useRef<TNewTodo[]>([])
 
-  function addTodo({ todo, previousTodos }: IUseOptimisticTodoProps) {
+  function addTodo({ todo, previousTodos }: IOptimisticTodoActionParams) {
     let newTodos
 
     if (todos.current.length === 0 && previousTodos) {
+      console.log(previousTodos)
       newTodos = [todo, ...previousTodos]
     } else {
       newTodos = [todo, ...todos.current]
@@ -43,7 +41,7 @@ export default function HandleTodosProvider({
     return newTodos
   }
 
-  function removeTodo({ todo, previousTodos }: IUseOptimisticTodoProps) {
+  function removeTodo({ todo, previousTodos }: IOptimisticTodoActionParams) {
     let newTodos
 
     if (todos.current.length === 0 && previousTodos) {
@@ -56,7 +54,7 @@ export default function HandleTodosProvider({
     return newTodos
   }
 
-  function updateTodo({ todo, previousTodos }: IUseOptimisticTodoProps) {
+  function updateTodo({ todo, previousTodos }: IOptimisticTodoActionParams) {
     let newTodos
 
     if (todos.current.length === 0 && previousTodos) {
