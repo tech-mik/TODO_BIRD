@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
 import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form'
 import { Input } from './ui/input'
+import { Plus } from '@phosphor-icons/react'
 
 interface OptimisticNewTodo extends TNewTodo {
   isLoading?: boolean
@@ -132,7 +133,12 @@ export default function AddTodoForm({ userId }: { userId: string }) {
           )}
         />
 
-        <Button type='submit'>Add Todo</Button>
+        <Button type='submit'>
+          <span className='block sm:hidden'>
+            <Plus />
+          </span>
+          <span className='hidden sm:block'>Add Todo</span>
+        </Button>
       </form>
     </Form>
   )

@@ -63,7 +63,7 @@ export default function SignInForm() {
           )}
         />
 
-        <div className='flex justify-between gap-5 '>
+        <div className='flex flex-col sm:flex-row justify-between gap-5 '>
           <Button disabled={isPending} className='w-full' type='submit'>
             {isPending && <SpinnerSmall />}
             Sign in with Email

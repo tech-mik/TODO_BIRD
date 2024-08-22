@@ -29,7 +29,7 @@ export default function AuthInfo({ id }: { id: string }) {
             alt='Mik ten Holt'
             className='rounded-full'
           /> */}
-      <span className=''>{data?.data?.name}</span>
+      <span className=''>{data?.data?.name || data?.data?.email}</span>
       {/* <CaretDown width={16} height={16} /> */}
     </>
   )

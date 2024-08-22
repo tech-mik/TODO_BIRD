@@ -44,11 +44,11 @@ export default function TodosList({ userId }: { userId: string }) {
 
   return (
     <HandleTodosProvider>
-      <CardHeader>
+      <CardHeader className='p-2 sm:p-6'>
         <AddTodoForm userId={userId} />
       </CardHeader>
 
-      <CardContent className='flex flex-col items-center justify-start gap-1'>
+      <CardContent className='p-2 pt-0 sm:p-6 sm:pt-0 flex flex-col items-center justify-start gap-1'>
         {data?.length ? (
           data?.map((todo) => <Todo todo={todo} key={todo.id} />)
         ) : (

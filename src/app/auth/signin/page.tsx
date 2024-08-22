@@ -1,4 +1,5 @@
 import { auth } from '@/auth'
+import Logo from '@/components/Logo'
 import SignInForm from '@/components/SignInForm'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { redirect } from 'next/navigation'
@@ -20,18 +21,21 @@ export default async function Page({ searchParams }: ISignInPageProps) {
   }
 
   return (
-    <main className='flex justify-center items-center w-full h-full'>
-      <Card className='min-w-[500px]'>
-        <CardHeader>
-          <h1 className='text-slate-800 font-normal text-3xl text-left'>
-            Let&apos;s <span className='underline font-semibold'>todo</span>{' '}
-            something today!
-          </h1>
-        </CardHeader>
-        <CardContent>
-          <SignInForm />
-        </CardContent>
-      </Card>
+    <main className='p-5 flex justify-center items-center w-full h-full'>
+      <div className='flex flex-col gap-3 max-w-[500px] min-w-[350px] sm:max-w-[500px] w-full'>
+        <Logo />
+        <Card className=''>
+          <CardHeader>
+            <h1 className='text-slate-800 font-normal text-3xl text-left'>
+              Let&apos;s <span className='underline font-semibold'>todo</span>{' '}
+              something today!
+            </h1>
+          </CardHeader>
+          <CardContent>
+            <SignInForm />
+          </CardContent>
+        </Card>
+      </div>
     </main>
   )
 }

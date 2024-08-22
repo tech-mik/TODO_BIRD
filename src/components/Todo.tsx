@@ -152,7 +152,12 @@ export default function Todo({ todo }: ITodoProps) {
                 render={({ field }) => (
                   <FormItem className='w-full'>
                     <FormControl>
-                      <Input {...field} type='text' defaultValue={todo.text} />
+                      <Input
+                        {...field}
+                        autoFocus={true}
+                        type='text'
+                        defaultValue={todo.text}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
