@@ -20,6 +20,7 @@ export default function AuthInfo({ id }: { id: string }) {
           width={10}
           height={10}
           src={data?.data?.image || '/no-profile.jpg'}
+          alt={data?.data?.name || 'No Profile'}
         />
       </Avatar>
       {/* <Image
