@@ -175,9 +175,7 @@ export default function Todo({ todo }: ITodoProps) {
       </div>
       {showForm && (
         <>
-          <Button
-            className='bg-green-600 px-3'
-            onClick={form.handleSubmit(onSubmit)}>
+          <Button variant='default' onClick={form.handleSubmit(onSubmit)}>
             <FloppyDisk />
           </Button>
           <Button
