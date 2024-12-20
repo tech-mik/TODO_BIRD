@@ -1,7 +1,6 @@
 import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
-import type { AdapterAccountType } from 'next-auth/adapters'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import z from 'zod'
+import type { AdapterAccountType } from 'next-auth/adapters'
 
 export const users = sqliteTable('user', {
   id: text('id')

@@ -3,20 +3,21 @@
 import { signInWithEmail } from '@/actions/auth'
 import { loginUserSchema } from '@/db/schemas/users'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowsClockwise } from '@phosphor-icons/react/dist/ssr'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { FaGoogle } from 'react-icons/fa'
 import { toast } from 'sonner'
 import z from 'zod'
+import SpinnerSmall from './SpinnerSmall'
 import { Button } from './ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form'
 import { Input } from './ui/input'
-import { signIn } from 'next-auth/react'
-import SpinnerSmall from './SpinnerSmall'
 
 export default function SignInForm() {
   const [isPending, setIsPending] = useState(false)
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof loginUserSchema>>({
     resolver: zodResolver(loginUserSchema),
@@ -30,10 +31,15 @@ export default function SignInForm() {
 
     // Call server action
     const res = await signInWithEmail(values)
+    console.log(res)
 
     if (res.success) {
-      toast.success('Check your mail for your magic link')
-      form.reset()
+      if (res.success === 'testAccount') {
+        router.replace('/')
+      } else {
+        toast.success('Check your mail for your magic link')
+        form.reset()
+      }
     }
     if (res.error) {
       toast.error(res.error.message)
@@ -63,7 +69,7 @@ export default function SignInForm() {
           )}
         />
 
-        <div className='flex flex-col sm:flex-row justify-between gap-5 '>
+        <div className='flex sm:flex-row flex-col justify-between gap-5'>
           <Button disabled={isPending} className='w-full' type='submit'>
             {isPending && <SpinnerSmall />}
             Sign in with Email
@@ -73,7 +79,7 @@ export default function SignInForm() {
             className='w-full'
             type='button'
             onMouseDown={() => signIn('google')}>
-            <FaGoogle className='mr-2 h-4 w-4 ' />
+            <FaGoogle className='mr-2 w-4 h-4' />
             Sign in with Google
           </Button>
         </div>

@@ -4,6 +4,7 @@ import { signIn } from '@/auth'
 import { loginUserSchema } from '@/db/schemas/users'
 import console from 'console'
 import { AuthError } from 'next-auth'
+import { isRedirectError } from 'next/dist/client/components/redirect'
 import z from 'zod'
 
 export async function signInWithEmail(
@@ -16,15 +17,24 @@ export async function signInWithEmail(
     // Validate schema
     await loginUserSchema.parseAsync(formData)
 
-    // Call SignIn from NextAuth
-    const redirectURL = await signIn('resend', {
-      email: formData.email,
-      redirect: false,
-    })
+    if (formData.email === 'example@mail.com') {
+      await signIn('credentials', { ...formData, redirect: false })
 
-    return {
-      success: redirectURL,
-      error: false,
+      return {
+        success: 'testAccount',
+        error: false,
+      }
+    } else {
+      // Call SignIn from NextAuth
+      const redirectURL = await signIn('resend', {
+        email: formData.email,
+        redirect: false,
+      })
+
+      return {
+        success: redirectURL,
+        error: false,
+      }
     }
   } catch (err) {
     if (err instanceof z.ZodError) {

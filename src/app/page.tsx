@@ -23,8 +23,6 @@ export default async function Home() {
     staleTime: 60 * 1000,
   })
 
-  console.log(session)
-
   await queryClient.prefetchQuery({
     queryKey: ['todos'],
     queryFn: async () => {
@@ -40,15 +38,15 @@ export default async function Home() {
 
   return (
     <SessionProvider>
-      <main className='w-full h-full flex flex-col justify-top items-center p-5'>
-        <div className='flex flex-col min-w-[350px] max-w-[550px] md:max-w-none lg:max-w-[1024px] h-full w-full'>
+      <main className='flex flex-col justify-top items-center p-5 w-full h-full'>
+        <div className='flex flex-col w-full min-w-[350px] max-w-[550px] md:max-w-none lg:max-w-[1024px] h-full'>
           <div className='flex justify-between mb-4'>
             <Logo />
             <HydrationBoundary state={dehydrate(queryClient)}>
               <Auth />
             </HydrationBoundary>
           </div>
-          <Card className='w-full mb-8'>
+          <Card className='mb-8 w-full'>
             <TodosList userId={id} />
           </Card>
         </div>

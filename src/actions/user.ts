@@ -13,3 +13,17 @@ export async function getUserById(id: string) {
     return { error: JSON.stringify(error) }
   }
 }
+
+export async function getUserByEmail(email: string) {
+  try {
+    const data = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .get()
+
+    return { ...data }
+  } catch (error) {
+    return { error: JSON.stringify(error) }
+  }
+}
