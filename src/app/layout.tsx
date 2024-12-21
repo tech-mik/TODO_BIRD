@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang='en'>
       <body className={`${font.className} w-screen h-screen antialiased`}>
         <Providers>{children}</Providers>
-        <Toaster />
+        <Toaster closeButton duration={10000} />
       </body>
     </html>
   )

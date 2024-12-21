@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import Logo from '@/components/Logo'
 import SignInForm from '@/components/SignInForm'
+import TestToaster from '@/components/TestToaster'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { redirect } from 'next/navigation'
 
@@ -21,21 +22,24 @@ export default async function Page({ searchParams }: ISignInPageProps) {
   }
 
   return (
-    <main className='p-5 flex justify-center items-center w-full h-full'>
-      <div className='flex flex-col gap-3 max-w-[500px] min-w-[350px] sm:max-w-[500px] w-full'>
-        <Logo />
-        <Card className=''>
-          <CardHeader>
-            <h1 className='text-slate-800 font-normal text-3xl text-left'>
-              Let&apos;s <span className='underline font-semibold'>todo</span>{' '}
-              something today!
-            </h1>
-          </CardHeader>
-          <CardContent>
-            <SignInForm />
-          </CardContent>
-        </Card>
-      </div>
-    </main>
+    <>
+      <TestToaster />
+      <main className='flex justify-center items-center p-5 w-full h-full'>
+        <div className='flex flex-col gap-3 w-full min-w-[350px] max-w-[500px] sm:max-w-[500px]'>
+          <Logo />
+          <Card className=''>
+            <CardHeader>
+              <h1 className='font-normal text-3xl text-left text-slate-800'>
+                Let&apos;s <span className='font-semibold underline'>todo</span>{' '}
+                something today!
+              </h1>
+            </CardHeader>
+            <CardContent>
+              <SignInForm />
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </>
   )
 }

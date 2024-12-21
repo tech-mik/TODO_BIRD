@@ -4,7 +4,7 @@ import { signInWithEmail } from '@/actions/auth'
 import { loginUserSchema } from '@/db/schemas/users'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { FaGoogle } from 'react-icons/fa'
@@ -18,6 +18,8 @@ import { Input } from './ui/input'
 export default function SignInForm() {
   const [isPending, setIsPending] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const testingParam = searchParams.get('testing')
 
   const form = useForm<z.infer<typeof loginUserSchema>>({
     resolver: zodResolver(loginUserSchema),
@@ -60,7 +62,11 @@ export default function SignInForm() {
               <FormControl>
                 <Input
                   {...field}
-                  value={field.value ?? ''}
+                  value={
+                    testingParam === 'true'
+                      ? 'example@mail.com'
+                      : field.value ?? ''
+                  }
                   placeholder='example@mail.com'
                 />
               </FormControl>
