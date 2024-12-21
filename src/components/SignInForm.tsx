@@ -24,7 +24,7 @@ export default function SignInForm() {
   const form = useForm<z.infer<typeof loginUserSchema>>({
     resolver: zodResolver(loginUserSchema),
     defaultValues: {
-      email: '',
+      email: testingParam === 'true' ? 'example@mail.com' : '',
     },
   })
 
@@ -62,11 +62,7 @@ export default function SignInForm() {
               <FormControl>
                 <Input
                   {...field}
-                  value={
-                    testingParam === 'true'
-                      ? 'example@mail.com'
-                      : field.value ?? ''
-                  }
+                  value={field.value ?? ''}
                   placeholder='example@mail.com'
                 />
               </FormControl>
